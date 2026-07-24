@@ -163,4 +163,4 @@ def health():
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 8080))
     logger.info(f"Starting Feishu Claude Bot on port {port}")
-    app.run(host="0.0.0.0", port=port, debug=True)
+    app.run(host="0.0.0.0", port=port, debug=False)
