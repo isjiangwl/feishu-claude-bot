@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: feishu-claude-bot
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn --bind 0.0.0.0:$PORT app:app
+    envVars:
+      - key: FEISHU_APP_ID
+        value: cli_aae87a396bb91bd5
+      - key: FEISHU_APP_SECRET
+        value: wtJDXevBl68zqvtifhZVOhs3ENSYrZOB
+      - key: FEISHU_ENCRYPT_KEY
+        value: yvHDyBsMTurObySfAoQVTe0DtvrIwmqY
+      - key: FEISHU_VERIFICATION_TOKEN
+        value: iD5x8sjXjOW4ZWHWL7Ikvc2lk5PSh4Pi
+      - key: ANTHROPIC_API_KEY
+        value: ah-6d15aa08879df0be388cb46b40b5ca784551a8c092f82d9ae518617751abdc4f
+      - key: CLAUDE_MODEL
+        value: claude-sonnet-4-20250514
