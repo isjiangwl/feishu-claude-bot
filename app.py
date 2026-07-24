@@ -3,7 +3,6 @@ import json
 import hashlib
 import logging
 from flask import Flask, request, jsonify
-from anthropic import Anthropic
 import requests
 from dotenv import load_dotenv
 
@@ -22,9 +21,6 @@ FEISHU_VERIFICATION_TOKEN = os.getenv('FEISHU_VERIFICATION_TOKEN')
 ANTHROPIC_API_KEY = os.getenv('ANTHROPIC_API_KEY')
 CLAUDE_MODEL = os.getenv('CLAUDE_MODEL', 'claude-sonnet-4-20250514')
 CLAUDE_MAX_TOKENS = int(os.getenv('CLAUDE_MAX_TOKENS', '2048'))
-
-# Anthropic 客户端
-client = Anthropic(api_key=ANTHROPIC_API_KEY)
 
 # 存储会话历史（生产环境应使用 Redis 等持久化存储）
 conversation_history = {}
@@ -76,12 +72,25 @@ def call_claude(user_message, chat_id):
         conversation_history[chat_id] = conversation_history[chat_id][-20:]
 
     try:
-        response = client.messages.create(
-            model=CLAUDE_MODEL,
-            max_tokens=CLAUDE_MAX_TOKENS,
-            messages=conversation_history[chat_id]
-        )
-        assistant_message = response.content[0].text
+        url = "https://api.anthropic.com/v1/messages"
+        headers = {
+            "x-api-key": ANTHROPIC_API_KEY,
+            "anthropic-version": "2023-06-01",
+            "content-type": "application/json"
+        }
+        payload = {
+            "model": CLAUDE_MODEL,
+            "max_tokens": CLAUDE_MAX_TOKENS,
+            "messages": conversation_history[chat_id]
+        }
+
+        response = requests.post(url, json=payload, headers=headers, timeout=60)
+        result = response.json()
+
+        if "content" in result and len(result["content"]) > 0:
+            assistant_message = result["content"][0]["text"]
+        else:
+            assistant_message = "抱歉，Claude 返回了空回复"
 
         # 添加助手回复到历史
         conversation_history[chat_id].append({
